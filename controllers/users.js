@@ -2,16 +2,15 @@ const bcrypt = require('bcryptjs');
 const JWT = require('jsonwebtoken');
 
 const { NODE_ENV, JWT_SECRET } = process.env; // productionKey
-const KEY = 'mega-puper-super-duper-secret-key'; // devKey
+const { DEVKEY, responseMessage } = require('../utils/config');
+const { RESPONSE_OK, RESPONSE_CREATED } = require('../errors/statuscode');
 
 const User = require('../models/user');
-
-const responseMessage = (res, status, obj) => res.status(status).send(obj);
 
 // Получение авторизованного юзера
 const getUser = (req, res, next) => {
   User.findById(req.user._id)
-    .then((user) => responseMessage(res, 200, { data: user }))
+    .then((user) => responseMessage(res, RESPONSE_OK, { data: user }))
     .catch(next);
 };
 
@@ -21,7 +20,7 @@ const updateUserInfo = (req, res, next) => {
   const { email, user } = req.body;
 
   User.findByIdAndUpdate(owner, { email, user }, { new: true, runValidators: true })
-    .then((userInfo) => responseMessage(res, 200, { data: userInfo }))
+    .then((userInfo) => responseMessage(res, RESPONSE_OK, { data: userInfo }))
     .catch(next);
 };
 
@@ -40,7 +39,7 @@ const createUser = (req, res, next) => {
       password: hash,
     }))
     .then((user) => {
-      responseMessage(res, 201, {
+      responseMessage(res, RESPONSE_CREATED, {
         _id: user._id,
         name: user.name,
         email: user.email,
@@ -57,7 +56,7 @@ const authorization = (req, res, next) => {
     .then((user) => {
       const token = JWT.sign( // генерируем токен валидный 7д
         { _id: user._id },
-        NODE_ENV === 'production' ? JWT_SECRET : KEY,
+        NODE_ENV === 'production' ? JWT_SECRET : DEVKEY,
         { expiresIn: '7d' },
       );
 
@@ -72,7 +71,7 @@ const authorization = (req, res, next) => {
 const logout = (req, res) => {
   try {
     res.clearCookie('jwt'); // чистка кук, токена ЖВТ
-    return responseMessage(res, 200, { message: 'Вы вышли из системы' });
+    return responseMessage(res, RESPONSE_OK, { message: 'Вы вышли из системы' });
   } catch (err) {
     return new Error('Неудачная попытка выйти из акканута');
   }
