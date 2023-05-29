@@ -1,0 +1,87 @@
+const bcrypt = require('bcryptjs');
+const JWT = require('jsonwebtoken');
+
+const { NODE_ENV, JWT_SECRET } = process.env; // productionKey
+const KEY = 'mega-puper-super-duper-secret-key'; // devKey
+
+const User = require('../models/user');
+
+const responseMessage = (res, status, obj) => res.status(status).send(obj);
+
+// Получение авторизованного юзера
+const getUser = (req, res, next) => {
+  User.findById(req.user._id)
+    .then((user) => responseMessage(res, 200, { data: user }))
+    .catch(next);
+};
+
+// Обновление инфы о юзере
+const updateUserInfo = (req, res, next) => {
+  const owner = req.user._id;
+  const { email, user } = req.body;
+
+  User.findByIdAndUpdate(owner, { email, user }, { new: true, runValidators: true })
+    .then((userInfo) => responseMessage(res, 200, { data: userInfo }))
+    .catch(next);
+};
+
+// Регистрация
+const createUser = (req, res, next) => {
+  const {
+    email,
+    password,
+    name,
+  } = req.body;
+
+  bcrypt.hash(password, 10) // хэшируем пароль
+    .then((hash) => User.create({
+      name,
+      email,
+      password: hash,
+    }))
+    .then((user) => {
+      responseMessage(res, 201, {
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+      });
+    })
+    .catch(next);
+};
+
+// Авторизация
+const authorization = (req, res, next) => {
+  const { email, password } = req.body;
+
+  return User.findUserByCredentials(email, password)
+    .then((user) => {
+      const token = JWT.sign( // генерируем токен валидный 7д
+        { _id: user._id },
+        NODE_ENV === 'production' ? JWT_SECRET : KEY,
+        { expiresIn: '7d' },
+      );
+
+      res // возвращем ответом куками токен
+        .cookie('jwt', token, { maxAge: 3600000 * 24 * 7, httpOnly: true })
+        .send({ message: 'Авторизация прошла успешно' });
+    })
+    .catch(next);
+};
+
+// Выход из учетки
+const logout = (req, res) => {
+  try {
+    res.clearCookie('jwt'); // чистка кук, токена ЖВТ
+    return responseMessage(res, 200, { message: 'Вы вышли из системы' });
+  } catch (err) {
+    return new Error('Неудачная попытка выйти из акканута');
+  }
+};
+
+module.exports = {
+  getUser,
+  updateUserInfo,
+  createUser,
+  authorization,
+  logout,
+};
