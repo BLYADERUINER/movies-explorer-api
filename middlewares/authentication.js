@@ -7,7 +7,9 @@ const { DEVKEY } = require('../utils/config');
 // Аутентификация
 function authentication(req, res, next) {
   const token = req.cookies.jwt; // находим в куках токен
-  if (!token) return (new UnauthorizedError('Произошла ошибка: вы не авторизованы!'));
+  if (!token) {
+    return next(new UnauthorizedError('Произошла ошибка: вы не авторизованы!'));
+  }
 
   let validToken;
 
