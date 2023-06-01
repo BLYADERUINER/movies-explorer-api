@@ -10,6 +10,8 @@ const handleErrors = (err, req, res, next) => {
     return;
   }
 
+  console.log(err);
+
   responseMessage(res, statusCode, { // возвращем статус и месседж
     message: statusCode === ERROR_DEFAULT
       ? 'Внутреняя ошибка сервера'

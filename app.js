@@ -1,3 +1,5 @@
+require('dotenv').config();
+
 const express = require('express');
 const mongoose = require('mongoose');
 const cookieParser = require('cookie-parser');
@@ -14,12 +16,11 @@ const app = express();
 mongoose.connect(MONGOOSE_URL);
 
 app.use(cors);
-app.use(helmet());
-app.use(limiter);
 app.use(express.json());
+app.use(helmet());
 app.use(cookieParser());
-
 app.use(requestLogger);
+app.use(limiter);
 
 app.use(router);
 

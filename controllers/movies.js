@@ -1,20 +1,21 @@
-const { responseMessage } = require('../utils/config');
+const Movie = require('../models/movie');
+
 const { RESPONSE_OK, RESPONSE_CREATED } = require('../errors/statuscode');
+
+const { responseMessage } = require('../utils/config');
 
 const NotFoundError = require('../errors/not-found-error');
 const ForbiddenError = require('../errors/forbidden-error');
 
-const Movie = require('../models/movie');
-
 // Получение всех избранных фильмов
-const getMovies = (res, req, next) => {
+const getMovies = (req, res, next) => {
   Movie.find({})
     .then((movies) => responseMessage(res, RESPONSE_OK, { data: movies }))
     .catch(next);
 };
 
 // Создание избранного фильма
-const createFavoriteMovie = (res, req, next) => {
+const createFavoriteMovie = (req, res, next) => {
   const owner = req.user._id;
   const {
     country,
@@ -23,33 +24,33 @@ const createFavoriteMovie = (res, req, next) => {
     year,
     description,
     image,
-    trailer,
-    nameRU,
-    nameEN,
+    trailerLink,
     thumbnail,
     movieId,
+    nameRU,
+    nameEN,
   } = req.body;
 
   Movie.create({
-    owner,
     country,
     director,
     duration,
     year,
     description,
     image,
-    trailer,
+    trailerLink,
+    thumbnail,
+    owner,
+    movieId,
     nameRU,
     nameEN,
-    thumbnail,
-    movieId,
   })
     .then((movie) => responseMessage(res, RESPONSE_CREATED, { data: movie }))
     .catch(next);
 };
 
 // Удаление фильма
-const removeMovie = (res, req, next) => {
+const removeMovie = (req, res, next) => {
   const owner = req.user._id;
   const { _id } = req.params;
 

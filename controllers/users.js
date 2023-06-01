@@ -17,9 +17,9 @@ const getUser = (req, res, next) => {
 // Обновление инфы о юзере
 const updateUserInfo = (req, res, next) => {
   const owner = req.user._id;
-  const { email, user } = req.body;
+  const { email, name } = req.body;
 
-  User.findByIdAndUpdate(owner, { email, user }, { new: true, runValidators: true })
+  User.findByIdAndUpdate(owner, { email, name }, { new: true, runValidators: true })
     .then((userInfo) => responseMessage(res, RESPONSE_OK, { data: userInfo }))
     .catch(next);
 };
@@ -68,7 +68,7 @@ const authorization = (req, res, next) => {
 };
 
 // Выход из учетки
-const logout = (req, res) => {
+const signout = (req, res) => {
   try {
     res.clearCookie('jwt'); // чистка кук, токена ЖВТ
     return responseMessage(res, RESPONSE_OK, { message: 'Вы вышли из системы' });
@@ -82,5 +82,5 @@ module.exports = {
   updateUserInfo,
   createUser,
   authorization,
-  logout,
+  signout,
 };

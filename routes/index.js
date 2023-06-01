@@ -5,12 +5,12 @@ const movieRouter = require('./movies');
 
 const { userValid, loginValid } = require('../middlewares/validation');
 const authentication = require('../middlewares/authentication');
-const { authorization, createUser, logout } = require('../controllers/users');
+const { authorization, createUser, signout } = require('../controllers/users');
 const RequestNotFound = require('../errors/request-not-found');
 
 router.post('/signup', userValid, createUser); // Роут регистрации
 router.post('/signin', loginValid, authorization); // Роут авторизации
-router.post('/logout', logout); // Роут логаута
+router.post('/signout', authentication, signout); // Роут логаута
 
 router.use('/users', authentication, userRouter); // Роут юзеров
 router.use('/movies', authentication, movieRouter); // Роут фильмов
