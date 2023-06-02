@@ -9,7 +9,8 @@ const ForbiddenError = require('../errors/forbidden-error');
 
 // Получение всех избранных фильмов
 const getMovies = (req, res, next) => {
-  Movie.find({})
+  const owner = req.user._id;
+  Movie.find({ owner })
     .then((movies) => responseMessage(res, RESPONSE_OK, { data: movies }))
     .catch(next);
 };
